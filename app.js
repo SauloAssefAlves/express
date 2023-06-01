@@ -1,3 +1,4 @@
+const cors = require("cors");
 const express = require("express");
 const mongoose = require("mongoose");
 const { MongoClient, ServerApiVersion, ObjectId } = require("mongodb");
@@ -17,6 +18,7 @@ const client = new MongoClient(uri, {
 
 app.use(bp.json());
 app.use(bp.urlencoded({ extended: true }));
+app.use(cors());
 
 async function run() {
   try {
@@ -87,9 +89,11 @@ async function searchMusics(filter) {
   let result;
   if (filter) {
     result = await client.db("Data").collection("musicas").findOne(filter);
+    console.log("aaaaa",result)
   } else {
     let cursor = client.db("Data").collection("musicas").find();
     result = await cursor.toArray();
+    console.log("asssssss",result)
   }
   if (result) {
     return result;
@@ -271,7 +275,13 @@ app.get("/musicas", async (req, res) => {
   const { title } = req.query;
   const filter = { title: title };
   console.log(filter);
-  let result = await searchMusics(filter);
+  let result;
+  if(title){
+    result = await searchMusics(filter);
+  }else{
+    result = await searchMusics();
+  }
+
   let response = {
     code: 200,
     data: result,
